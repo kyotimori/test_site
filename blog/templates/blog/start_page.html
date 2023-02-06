@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block page_title %}Blog{% endblock %}
+
+{% block css_files %}
+    <link rel='stylesheet' href="{% static 'blog/includes/post-preview.css' %}">
+    <link rel='stylesheet' href="{% static 'blog/start_page.css' %}">
+{% endblock %}
+
+{% block content %}
+    <section id="welcome">
+        <header>
+            <img src="{% static 'blog/images/user_pic.jpg' %}">
+            <h2>Niki's Blog</h2>
+        </header>
+        <p>{{ intro }}</p>
+    </section>
+
+    <section id='latest-posts'>
+        <h2>Latest Posts</h2>
+        <ul class="posts">
+            {% for post in data %}
+                {% include 'blog/includes/post-preview.html' %}
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section id='about'>
+        <h2>What I Do</h2>
+        <p>
+            AAAAAAAAAAAAA
+        </p>
+    </section>
+{% endblock %}
