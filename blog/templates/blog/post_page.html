@@ -9,6 +9,14 @@
 {% endblock %}
 
 {% block content %}
+    {% if comment_form.errors %}
+        <div id='alert'>
+            <h2>Saving the comment failed!</h2>
+            <p>Please check the comment form below the post and fix your errors.</p>
+            <a href='#comment-form'>Fix!</a>
+        </div>
+    {% endif %}
+
     <section id='summary'>
         <h2>{{ post.title }}</h2>
         <div>
@@ -16,6 +24,21 @@
                 <span class='tag'>{{ tag.tag_name }}</span>
             {% endfor %}
         </div>
+
+        <div id='read-later'>
+            <form action="{% url 'stored_posts' %}" method='POST'>
+                {% csrf_token%}
+                <input type='hidden' name='post_id' value='{{ post.id }}'>
+                <button>
+                    {% if is_stored %}
+                        Remove from stored posts
+                    {% else %}
+                        Read Later
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+
         <article>
             <img src='{{ post.image.url }}' alt='{{ post.title }}'>
             <address>By <a href='mailto:{{ post.author.email_address }}'>{{ post.author }}</a></address>
@@ -27,15 +50,30 @@
         {{ post.content|linebreaks }} 
     </main>
 
-    <form action='post-page' method='POST'>
-        {% csrf_token %}
-        {% for field in form %}
-            <div class='form-controls {% if field.errors %}errors{% endif %}'>
-                {{ field.label_tag }}
-                {{ field }}
-                {{ field.errors }}
-            </div>
-        {% endfor %}
-        <button>Save Comment</button>
-    </form>
+    <section id='comments'>
+        <h2>Comments</h2>
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <h3>{{ comment.user_name }}</h3>
+                    <p>{{ comment.comment_text|linebreaks }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section id='comment-form'>
+        <h2>Your Comment</h2>
+        <form action='{% url 'post_page' post.slug %}' method='POST'>
+            {% csrf_token %}
+            {% for field in comment_form %}
+                <div class='form-control {% if field.errors %}invalid{% endif %}'>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <button>Save Comment</button>
+        </form>
+    </section>
 {% endblock %}
