@@ -29,21 +29,23 @@ class AllPostsView(ListView):
 
 
 class PostDetailView(View):
-    def get_data(self, request, slug):
-        post = Post.objects.get(slug=slug)
+    def is_stored_post(self, request, post_id):
         stored_posts = request.session.get('stored_posts')
-
-        if stored_posts:
-            is_saved_for_later = post.id in stored_posts
+        if stored_posts is not None:
+            is_saved_for_later = post_id in stored_posts
         else:
             is_saved_for_later = False
+        return is_saved_for_later
+    
+    def get_data(self, request, slug):
+        post = Post.objects.get(slug=slug)
 
         data = {
             'post': post,
             'post_tags': post.tag.all(),
             'comment_form': CommentForm,
             'comments': post.comments.all().order_by('-date'),
-            'is_stored': is_saved_for_later
+            'is_stored': self.is_stored_post(request, post.id)
         }
         return data
 
@@ -51,10 +53,6 @@ class PostDetailView(View):
         return render(request, 'blog/post_page.html', self.get_data(request, slug))
 
     def post(self, request, slug):
-        read_later_post = request.POST['post_id']
-        request.session['read_later_posts'] = []
-        request.session['read_later_posts'].append(read_later_post)
-
         comment_form = CommentForm(request.POST)
         post = Post.objects.get(slug=slug)
 
